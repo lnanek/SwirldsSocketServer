@@ -10,7 +10,9 @@
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -68,19 +70,36 @@ public class HelloSwirldDemoMain implements SwirldMain {
 	
 	public void startServer() {
 		try {
-			console.out.println("Listening on: " + PORT);
 			
+			// Wait for someone to connect a socket to us
+			console.out.println("Listening on: " + PORT);			
 			ServerSocket serverSocket = new ServerSocket(PORT);
 			Socket socket = serverSocket.accept();
+			
+			
+			// Write a message to them
+			// TODO write out the current hashgraph state
 			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
 			printWriter.write("Hello user!\n");
 			printWriter.flush();
+			console.out.println("Wrote Hello user!\n");
+
+			
+			// Read the message from them
+			// TODO put what was written to the socket on the hashgraph
+	        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+	        console.out.println("Read: " + bufferedReader.readLine());
+	        //socket.close();
+
+	        
+			// Close socket
+	        // TODO keep running
+	        bufferedReader.close();
 			printWriter.close();
 			socket.close();
 			serverSocket.close();
 			
-			console.out.println("Wrote Hello user!\n");
-			
+						
 		} catch (IOException e) {
 			console.out.println("Error listening: " + e);
 		}
