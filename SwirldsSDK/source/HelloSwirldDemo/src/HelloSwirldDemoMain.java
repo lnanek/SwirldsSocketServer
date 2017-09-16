@@ -72,43 +72,45 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		try {
 			
 			// Wait for someone to connect a socket to us
-			console.out.println("Listening on: " + PORT);			
+			console.out.println("Listening on port " + PORT + "...");			
 			ServerSocket serverSocket = new ServerSocket(PORT);
+
+			// TODO start a new thread for each accepted socket rather than only listening once
 			Socket socket = serverSocket.accept();
-			
-			
-			// Write a message to them
-			// TODO write out the current hashgraph state
-			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
-			printWriter.write("Hello user!\n");
-			printWriter.flush();
-			console.out.println("Wrote Hello user!\n");
+			console.out.println("Server socket accepted connection...");	
 
 			
-			// Read the message from them
-			// TODO put what was written to the socket on the hashgraph
+			// Write a message to them
+			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());			
+			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
+			for(String hashgraphMessage : state.getStrings()) {
+				printWriter.write(hashgraphMessage + "\n");
+				printWriter.flush();				
+				console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);				
+			}			
+	        console.out.println("Finished writing to socket");
+			//printWriter.write("Hello user!\n");
+			//console.out.println("Wrote Hello user!\n");
+			
+
+			// Read the message from the socket
 	        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	        String readLine;
 	        while( (readLine = bufferedReader.readLine()) != null) {
 	        		console.out.println("Read from socket: " + readLine);
-	        		
 	        		// Put transaction with line that was written to our socket on the hashgraph
 	        		byte[] transaction = readLine.getBytes(StandardCharsets.UTF_8);
-	        		platform.createTransaction(transaction, null);
-	        		
+	        		platform.createTransaction(transaction, null);	
 	        		console.out.println("Wrote to hashgraph: " + readLine);
-	        }
-	        	        
+	        }	        	        
+	        console.out.println("Finished reading from socket");
 	        //socket.close();
-
-	        
+	     	        
 			// Close socket
-	        // TODO keep running
 	        bufferedReader.close();
 			printWriter.close();
 			socket.close();
 			serverSocket.close();
-			
 						
 		} catch (IOException e) {
 			console.out.println("Error listening: " + e);
