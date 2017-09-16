@@ -25,9 +25,9 @@ import com.swirlds.platform.SwirldMain;
 import com.swirlds.platform.SwirldState;
 
 /**
- * This HelloSwirld creates a single transaction, consisting of the string "Hello Swirld", and then goes
- * into a busy loop (checking once a second) to see when the state gets the transaction. When it does, it
- * prints it, too.
+ * This HelloSwirld creates a single transaction, consisting of the string
+ * "Hello Swirld", and then goes into a busy loop (checking once a second) to
+ * see when the state gets the transaction. When it does, it prints it, too.
  */
 public class HelloSwirldDemoMain implements SwirldMain {
 	/** the platform running this app */
@@ -40,9 +40,9 @@ public class HelloSwirldDemoMain implements SwirldMain {
 	public final int sleepPeriod = 100;
 
 	/**
-	 * This is just for debugging: it allows the app to run in Eclipse. If the config.txt exists and lists a
-	 * particular SwirldMain class as the one to run, then it can run in Eclipse (with the green triangle
-	 * icon).
+	 * This is just for debugging: it allows the app to run in Eclipse. If the
+	 * config.txt exists and lists a particular SwirldMain class as the one to run,
+	 * then it can run in Eclipse (with the green triangle icon).
 	 * 
 	 * @param args
 	 *            these are not used
@@ -63,55 +63,82 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		this.selfId = id;
 		this.console = platform.createConsole(true); // create the window, make it visible
 		platform.setAbout("Hello Swirld v. 1.0\n"); // set the browser's "about" box
-		platform.setSleepAfterSync(sleepPeriod);		
+		platform.setSleepAfterSync(sleepPeriod);
 	}
 
 	public static final int PORT = 9111;
-	
+
 	public void startServer() {
+		ServerSocket serverSocket = null;
 		try {
-			
+
 			// Wait for someone to connect a socket to us
-			console.out.println("Listening on port " + PORT + "...");			
-			ServerSocket serverSocket = new ServerSocket(PORT);
+			console.out.println("Listening on port " + PORT + "...");
+			serverSocket = new ServerSocket(PORT);
 
-			// TODO start a new thread for each accepted socket rather than only listening once
-			Socket socket = serverSocket.accept();
-			console.out.println("Server socket accepted connection...");	
+			while (true) {
+				// start a new thread for each accepted socket
+				Socket socket = serverSocket.accept();
+				console.out.println("Server socket accepted connection...");
 
-			
+				new Thread() {
+					@Override
+					public void run() {
+						serviceClientConnection(socket);
+					}
+				}.start();
+				
+			}
+
+		} catch (IOException e) {
+			console.out.println("Error listening: " + e);
+		} finally {
+			if (serverSocket != null) {
+				try {
+				serverSocket.close();
+				} catch(Exception e) {
+					// Ignore
+				}
+			}
+		}
+	}
+
+	private void serviceClientConnection(Socket socket) {
+
+		try {
+
+			console.out.println("Servicing client on background thread...");
+
 			// Write a message to them
-			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());			
+			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
 			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
-			for(String hashgraphMessage : state.getStrings()) {
+			for (String hashgraphMessage : state.getStrings()) {
 				printWriter.write(hashgraphMessage + "\n");
-				printWriter.flush();				
-				console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);				
-			}			
-	        console.out.println("Finished writing to socket");
-			//printWriter.write("Hello user!\n");
-			//console.out.println("Wrote Hello user!\n");
-			
+				printWriter.flush();
+				console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);
+			}
+			console.out.println("Finished writing to socket");
+			// printWriter.write("Hello user!\n");
+			// console.out.println("Wrote Hello user!\n");
 
 			// Read the message from the socket
-	        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	        String readLine;
-	        while( (readLine = bufferedReader.readLine()) != null) {
-	        		console.out.println("Read from socket: " + readLine);
-	        		// Put transaction with line that was written to our socket on the hashgraph
-	        		byte[] transaction = readLine.getBytes(StandardCharsets.UTF_8);
-	        		platform.createTransaction(transaction, null);	
-	        		console.out.println("Wrote to hashgraph: " + readLine);
-	        }	        	        
-	        console.out.println("Finished reading from socket");
-	        //socket.close();
-	     	        
+			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			String readLine;
+			while ((readLine = bufferedReader.readLine()) != null) {
+				console.out.println("Read from socket: " + readLine);
+				// Put transaction with line that was written to our socket on the hashgraph
+				byte[] transaction = readLine.getBytes(StandardCharsets.UTF_8);
+				platform.createTransaction(transaction, null);
+				console.out.println("Wrote to hashgraph: " + readLine);
+			}
+			console.out.println("Finished reading from socket");
+			// socket.close();
+
 			// Close socket
-	        bufferedReader.close();
+			bufferedReader.close();
 			printWriter.close();
 			socket.close();
-			serverSocket.close();
-						
+
 		} catch (IOException e) {
 			console.out.println("Error listening: " + e);
 		}
@@ -119,13 +146,12 @@ public class HelloSwirldDemoMain implements SwirldMain {
 
 	@Override
 	public void run() {
-		
+
 		console.out.println("Lance was here");
-		
+
 		startServer();
-		
-		String myName = platform.getState().getAddressBookCopy()
-				.getAddress(selfId).getSelfName();
+
+		String myName = platform.getState().getAddressBookCopy().getAddress(selfId).getSelfName();
 
 		console.out.println("Hello Swirld from " + myName);
 
@@ -143,8 +169,7 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		String lastReceived = "";
 
 		while (true) {
-			HelloSwirldDemoState state = (HelloSwirldDemoState) platform
-					.getState();
+			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
 			String received = state.getReceived();
 
 			if (!lastReceived.equals(received)) {
