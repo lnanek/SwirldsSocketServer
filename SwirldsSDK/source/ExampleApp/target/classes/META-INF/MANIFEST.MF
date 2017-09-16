@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Built-By: lance.nanek
+Build-Jdk: 1.8.0_131
+Main-Class: ExampleAppMain
+Created-By: Maven Integration for Eclipse
+
