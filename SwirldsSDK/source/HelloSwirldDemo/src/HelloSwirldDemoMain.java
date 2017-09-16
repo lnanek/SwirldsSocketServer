@@ -10,6 +10,10 @@
  * DISTRIBUTING THIS SOFTWARE OR ITS DERIVATIVES.
  */
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 import com.swirlds.platform.Browser;
@@ -57,11 +61,38 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		this.selfId = id;
 		this.console = platform.createConsole(true); // create the window, make it visible
 		platform.setAbout("Hello Swirld v. 1.0\n"); // set the browser's "about" box
-		platform.setSleepAfterSync(sleepPeriod);
+		platform.setSleepAfterSync(sleepPeriod);		
+	}
+
+	public static final int PORT = 9111;
+	
+	public void startServer() {
+		try {
+			console.out.println("Listening on: " + PORT);
+			
+			ServerSocket serverSocket = new ServerSocket(PORT);
+			Socket socket = serverSocket.accept();
+			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+			printWriter.write("Hello user!\n");
+			printWriter.flush();
+			printWriter.close();
+			socket.close();
+			serverSocket.close();
+			
+			console.out.println("Wrote Hello user!\n");
+			
+		} catch (IOException e) {
+			console.out.println("Error listening: " + e);
+		}
 	}
 
 	@Override
 	public void run() {
+		
+		console.out.println("Lance was here");
+		
+		startServer();
+		
 		String myName = platform.getState().getAddressBookCopy()
 				.getAddress(selfId).getSelfName();
 
