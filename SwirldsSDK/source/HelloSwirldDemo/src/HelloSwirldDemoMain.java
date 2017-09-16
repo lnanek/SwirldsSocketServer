@@ -90,7 +90,13 @@ public class HelloSwirldDemoMain implements SwirldMain {
 	        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 	        String readLine;
 	        while( (readLine = bufferedReader.readLine()) != null) {
-	        		console.out.println("Read: " + readLine);
+	        		console.out.println("Read from socket: " + readLine);
+	        		
+	        		// Put transaction with line that was written to our socket on the hashgraph
+	        		byte[] transaction = readLine.getBytes(StandardCharsets.UTF_8);
+	        		platform.createTransaction(transaction, null);
+	        		
+	        		console.out.println("Wrote to hashgraph: " + readLine);
 	        }
 	        	        
 	        //socket.close();
