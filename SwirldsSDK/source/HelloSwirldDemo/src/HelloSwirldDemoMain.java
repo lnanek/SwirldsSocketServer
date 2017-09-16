@@ -88,7 +88,11 @@ public class HelloSwirldDemoMain implements SwirldMain {
 			// Read the message from them
 			// TODO put what was written to the socket on the hashgraph
 	        BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-	        console.out.println("Read: " + bufferedReader.readLine());
+	        String readLine;
+	        while( (readLine = bufferedReader.readLine()) != null) {
+	        		console.out.println("Read: " + readLine);
+	        }
+	        	        
 	        //socket.close();
 
 	        
