@@ -134,7 +134,7 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		// The Platform will also send the transaction to
 		// all the other members of the community during syncs with them.
 		// The community as a whole will decide the order of the transactions
-		platform.createTransaction(transaction, null);
+		//platform.createTransaction(transaction, null);
 		String lastReceived = "";
 
 		while (true) {
