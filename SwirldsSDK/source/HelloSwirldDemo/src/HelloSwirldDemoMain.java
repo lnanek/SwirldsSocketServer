@@ -82,13 +82,18 @@ public class HelloSwirldDemoMain implements SwirldMain {
 				throws IOException, ServletException {
 
 			String requestBody = request.getReader().lines().collect(Collectors.joining());
-			console.out.println("Finished reading from socket");
+			console.out.println("\n\nFinished reading request from socket");
 			
 			requestBody = requestBody.replaceAll("\\n", "");
 			requestBody = requestBody.replaceAll("\\r", "");
-			byte[] transaction = requestBody.getBytes(StandardCharsets.UTF_8);
-			platform.createTransaction(transaction, null);
-			console.out.println("Wrote to hashgraph: " + requestBody);
+			requestBody = requestBody.trim();
+			if (requestBody.length() > 0) {
+				byte[] transaction = requestBody.getBytes(StandardCharsets.UTF_8);
+				platform.createTransaction(transaction, null);
+				console.out.println("Wrote to hashgraph: " + requestBody);
+			} else {
+				console.out.println("Not writing to hashgraph, empty request body.");				
+			}
 
 			response.setContentType("text/plain;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
@@ -100,7 +105,7 @@ public class HelloSwirldDemoMain implements SwirldMain {
 				response.getWriter().flush();
 				console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);
 			}
-			console.out.println("Writing hashgraph to HTTP response...");
+			console.out.println("Finished writing hashgraph to HTTP response.");
 		}
 	}
 
