@@ -112,6 +112,16 @@ public class HelloSwirldDemoMain implements SwirldMain {
 			// Write a message to them
 			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
 			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
+			//printWriter.write("HTTP/1.1 200 OK\r\nCache-Control: no-cache, private\r\nTransfer-Encoding: compress\r\nDate: Mon, 24 Nov 2014 10:21:21 GMT\r\n\r\n");
+			
+			printWriter.write("HTTP/1.1 200 OK\r\n");
+			printWriter.write("Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n");
+			printWriter.write("Server: Apache/2.2.14 (Win32)\r\n");
+			printWriter.write("Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\n");
+			printWriter.write("Transfer-Encoding: identity\r\n");
+			printWriter.write("Content-Type: text/plain\r\n");
+			printWriter.write("Connection: Closed\r\n\r\n");
+			
 			for (String hashgraphMessage : state.getStrings()) {
 				printWriter.write(hashgraphMessage + "\n");
 				printWriter.flush();
