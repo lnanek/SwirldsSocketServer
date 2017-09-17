@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
+using System.Globalization;
 
 public class PostToHashGraph : MonoBehaviour {
 
@@ -22,17 +24,21 @@ public class PostToHashGraph : MonoBehaviour {
 	public IEnumerator SendPostRequest() {
 		Debug.Log("Lance - PostToHashGraph");
 
-		var postData = @"{
-""phoneNumber"": ""16464092810"",
-""name"": ""Ina Yosun"",
-""latitude"": ""37.7780897"",
-""longitude"": ""-122.3846353"",
-""type"": ""person"",
-""crisis"": ""fire"",
-""startTime"": 1505616761856,
-""endTime"": 1505616761859,
-""status"": ""open""
-		}";
+		var t = DateTime.UtcNow - new DateTime(1970, 1, 1);
+		var secondsSinceEpoch = (int)t.TotalSeconds;
+
+		var postData = @"{";
+		postData += "\"phoneNumber\": \"16464092810\",\n";
+		postData += "\"name\": \"Ina Yosun\",\n";
+		postData += "\"latitude\": \"37.7780897\",\n";
+		postData += "\"longitude\": \"-122.3846353\",\n";
+		postData += "\"type\": \"person\",\n";
+		postData += "\"crisis\": \"fire\",\n";
+		postData += "\"startTime\": " + secondsSinceEpoch + ",\n";
+		postData += "\"endTime\": -1,\n";
+		postData += "\"status\": \"open\"\n";
+		postData += "}";
+
 		var rawData = System.Text.Encoding.UTF8.GetBytes(postData);
 
 		string url = "http://localhost:9111";
@@ -44,4 +50,5 @@ public class PostToHashGraph : MonoBehaviour {
 
 		Debug.Log("Lance - www result: " + www.text);
 	}
+
 }
