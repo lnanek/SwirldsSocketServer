@@ -17,6 +17,15 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.stream.Collectors;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.eclipse.jetty.server.Request;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.server.handler.AbstractHandler;
 
 import com.swirlds.platform.Browser;
 import com.swirlds.platform.Console;
@@ -68,89 +77,36 @@ public class HelloSwirldDemoMain implements SwirldMain {
 
 	public static final int PORT = 9111;
 
-	public void startServer() {
-		ServerSocket serverSocket = null;
-		try {
-
-			// Wait for someone to connect a socket to us
-			console.out.println("Listening on port " + PORT + "...");
-			serverSocket = new ServerSocket(PORT);
-
-			while (true) {
-				// start a new thread for each accepted socket
-				Socket socket = serverSocket.accept();
-				console.out.println("Server socket accepted connection...");
-
-				new Thread() {
-					@Override
-					public void run() {
-						serviceClientConnection(socket);
-					}
-				}.start();
-				
-			}
-
-		} catch (IOException e) {
-			console.out.println("Error listening: " + e);
-		} finally {
-			if (serverSocket != null) {
-				try {
-				serverSocket.close();
-				} catch(Exception e) {
-					// Ignore
+	private class HelloWorld extends AbstractHandler {
+		public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
+				throws IOException, ServletException {
+			
+			//request.getReader().lines().collect(Collectors.joining());
+			
+			  String line = null;
+			  //try {
+			    BufferedReader reader = request.getReader();
+			    while ((line = reader.readLine()) != null) {
+					console.out.println("Read from socket: " + line);
+					// Put transaction with line that was written to our socket on the hashgraph
+					byte[] transaction = line.getBytes(StandardCharsets.UTF_8);
+					platform.createTransaction(transaction, null);
+					console.out.println("Wrote to hashgraph: " + line);
 				}
-			}
-		}
-	}
-
-	private void serviceClientConnection(Socket socket) {
-
-		try {
-
-			console.out.println("Servicing client on background thread...");
-
-			// Write a message to them
-			PrintWriter printWriter = new PrintWriter(socket.getOutputStream());
+				console.out.println("Finished reading from socket");
+			  //}
+			
+			response.setContentType("text/plain;charset=utf-8");
+			response.setStatus(HttpServletResponse.SC_OK);
+			baseRequest.setHandled(true);
 			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
-			//printWriter.write("HTTP/1.1 200 OK\r\nCache-Control: no-cache, private\r\nTransfer-Encoding: compress\r\nDate: Mon, 24 Nov 2014 10:21:21 GMT\r\n\r\n");
-			
-			printWriter.write("HTTP/1.1 200 OK\r\n");
-			printWriter.write("Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n");
-			printWriter.write("Server: Apache/2.2.14 (Win32)\r\n");
-			printWriter.write("Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\n");
-			printWriter.write("Transfer-Encoding: identity\r\n");
-			printWriter.write("Content-Type: text/plain\r\n");
-			printWriter.write("Connection: Closed\r\n\r\n");
-			
+			console.out.println("Writing hashgraph to HTTP response...");
 			for (String hashgraphMessage : state.getStrings()) {
-				printWriter.write(hashgraphMessage + "\n");
-				printWriter.flush();
+				response.getWriter().println(hashgraphMessage);
+				response.getWriter().flush();
 				console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);
 			}
-			console.out.println("Finished writing to socket");
-			// printWriter.write("Hello user!\n");
-			// console.out.println("Wrote Hello user!\n");
-
-			// Read the message from the socket
-			BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-			String readLine;
-			while ((readLine = bufferedReader.readLine()) != null) {
-				console.out.println("Read from socket: " + readLine);
-				// Put transaction with line that was written to our socket on the hashgraph
-				byte[] transaction = readLine.getBytes(StandardCharsets.UTF_8);
-				platform.createTransaction(transaction, null);
-				console.out.println("Wrote to hashgraph: " + readLine);
-			}
-			console.out.println("Finished reading from socket");
-			// socket.close();
-
-			// Close socket
-			bufferedReader.close();
-			printWriter.close();
-			socket.close();
-
-		} catch (IOException e) {
-			console.out.println("Error listening: " + e);
+			console.out.println("Writing hashgraph to HTTP response...");
 		}
 	}
 
@@ -159,7 +115,16 @@ public class HelloSwirldDemoMain implements SwirldMain {
 
 		console.out.println("Lance was here");
 
-		startServer();
+		try {
+			Server server = new Server(PORT);
+			server.setHandler(new HelloWorld());
+			server.start();
+			server.join();
+		} catch (Exception e) {
+			console.out.println("Error running jetty: " + e);
+		}
+
+		// startServer();
 
 		String myName = platform.getState().getAddressBookCopy().getAddress(selfId).getSelfName();
 
