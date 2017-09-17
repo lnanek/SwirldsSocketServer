@@ -5,8 +5,22 @@ using UnityEngine;
 public class PostToHashGraph : MonoBehaviour {
 
 	// Use this for initialization
-	IEnumerator Start () {
+	void Start () {
 		Debug.Log("Lance - Start");
+	}
+	
+	// Update is called once per frame
+	void Update () {
+	}
+
+	// Called when button is clicked
+	public void MyOnClick() {
+		Debug.Log("Lance - MyOnClick");
+		StartCoroutine( SendPostRequest () );
+	}
+		
+	public IEnumerator SendPostRequest() {
+		Debug.Log("Lance - PostToHashGraph");
 
 		var postData = @"{
 ""phoneNumber"": ""16464092810"",
@@ -28,10 +42,5 @@ public class PostToHashGraph : MonoBehaviour {
 		yield return www;
 
 		Debug.Log("Lance - www result: " + www.text);
-	}
-	
-	// Update is called once per frame
-	void Update () {
-		
 	}
 }
