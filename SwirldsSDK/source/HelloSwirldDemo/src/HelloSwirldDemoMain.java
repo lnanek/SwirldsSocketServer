@@ -132,7 +132,7 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		// create a transaction. For this example app,
 		// we will define each transactions to simply
 		// be a string in UTF-8 encoding.
-		byte[] transaction = myName.getBytes(StandardCharsets.UTF_8);
+		//byte[] transaction = myName.getBytes(StandardCharsets.UTF_8);
 
 		// Send the transaction to the Platform, which will then
 		// forward it to the State object.
@@ -145,10 +145,15 @@ public class HelloSwirldDemoMain implements SwirldMain {
 		while (true) {
 			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
 			String received = state.getReceived();
-
 			if (!lastReceived.equals(received)) {
 				lastReceived = received;
-				console.out.println("Received: " + received); // print all received transactions
+
+				console.out.println("\n\nHashgraph was updated: ");
+				int itemNumber = 1;
+				for (String hashgraphMessage : state.getStrings()) {
+					console.out.println("Hashgraph item " + itemNumber + ": " + hashgraphMessage); // print all received transactions
+					itemNumber++;
+				}
 			}
 			try {
 				Thread.sleep(sleepPeriod);
