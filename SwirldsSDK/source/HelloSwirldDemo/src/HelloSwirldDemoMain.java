@@ -80,22 +80,16 @@ public class HelloSwirldDemoMain implements SwirldMain {
 	private class HelloWorld extends AbstractHandler {
 		public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 				throws IOException, ServletException {
+
+			String requestBody = request.getReader().lines().collect(Collectors.joining());
+			console.out.println("Finished reading from socket");
 			
-			//request.getReader().lines().collect(Collectors.joining());
-			
-			  String line = null;
-			  //try {
-			    BufferedReader reader = request.getReader();
-			    while ((line = reader.readLine()) != null) {
-					console.out.println("Read from socket: " + line);
-					// Put transaction with line that was written to our socket on the hashgraph
-					byte[] transaction = line.getBytes(StandardCharsets.UTF_8);
-					platform.createTransaction(transaction, null);
-					console.out.println("Wrote to hashgraph: " + line);
-				}
-				console.out.println("Finished reading from socket");
-			  //}
-			
+			requestBody = requestBody.replaceAll("\\n", "");
+			requestBody = requestBody.replaceAll("\\r", "");
+			byte[] transaction = requestBody.getBytes(StandardCharsets.UTF_8);
+			platform.createTransaction(transaction, null);
+			console.out.println("Wrote to hashgraph: " + requestBody);
+
 			response.setContentType("text/plain;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			baseRequest.setHandled(true);
