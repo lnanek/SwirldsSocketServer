@@ -20,7 +20,9 @@ public class PostToHashGraph : MonoBehaviour {
 	// Called when button is clicked
 	public void MyOnClick() {
 		Debug.Log("Lance - MyOnClick - Attempting localhost call...");
-		StartCoroutine( SendPostRequest ("http://localhost:9111", "http://b9c99ed0.ngrok.io") );
+		StartCoroutine( SendPostRequest ("http://localhost:9111", "http://64a066dc.ngrok.io") );
+		//StartCoroutine( SendPostRequest ("http://localhost:9111", "http://b9c99ed0.ngrok.io") );
+		StartCoroutine( SendPostRequest ("http://localhost:9111", "http://c7538a57.ngrok.io") );
 	}
 		
 	public IEnumerator SendPostRequest(string url, string fallbackUrl) {
@@ -45,7 +47,7 @@ public class PostToHashGraph : MonoBehaviour {
 		postData += "\"crisis\": \"fire\",\n";
 		postData += "\"startTime\": " + secondsSinceEpoch + ",\n";
 		postData += "\"endTime\": -1,\n";
-		postData += "\"status\": \"open\"\n";
+		postData += "\"status\": \"open\",\n";
 		postData += "}";
 
 		var rawData = System.Text.Encoding.UTF8.GetBytes(postData);

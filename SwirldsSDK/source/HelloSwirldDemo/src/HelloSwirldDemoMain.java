@@ -76,13 +76,17 @@ public class HelloSwirldDemoMain implements SwirldMain {
 	}
 
 	public static final int PORT = 9111;
+	
+	private static int ignoreCount = 0;
 
 	private class HelloWorld extends AbstractHandler {
 		public void handle(String target, Request baseRequest, HttpServletRequest request, HttpServletResponse response)
 				throws IOException, ServletException {
 
+			console.out.println("\n\nReceived request method: " + request.getMethod());
+			
 			String requestBody = request.getReader().lines().collect(Collectors.joining());
-			console.out.println("\n\nFinished reading request from socket");
+			console.out.println("Finished reading request from socket");
 			
 			requestBody = requestBody.replaceAll("\\n", "");
 			requestBody = requestBody.replaceAll("\\r", "");
@@ -98,12 +102,21 @@ public class HelloSwirldDemoMain implements SwirldMain {
 			response.setContentType("text/plain;charset=utf-8");
 			response.setStatus(HttpServletResponse.SC_OK);
 			baseRequest.setHandled(true);
-			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
 			console.out.println("Writing hashgraph to HTTP response...");
+			HelloSwirldDemoState state = (HelloSwirldDemoState) platform.getState();
+			if (request.getMethod().equalsIgnoreCase("DELETE")) {
+				ignoreCount = state.getStrings().size();
+				// 0 if nothing
+				// 2 if two tx
+			}
+			int sendingCount = 0;
 			for (String hashgraphMessage : state.getStrings()) {
-				response.getWriter().println(hashgraphMessage);
-				response.getWriter().flush();
-				console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);
+				//if (sendingCount > ignoreCount) {
+					response.getWriter().println(hashgraphMessage);
+					response.getWriter().flush();
+					console.out.println("Wrote hashgraph message to socket: " + hashgraphMessage);
+				//}
+				sendingCount++;
 			}
 			console.out.println("Finished writing hashgraph to HTTP response.");
 		}
