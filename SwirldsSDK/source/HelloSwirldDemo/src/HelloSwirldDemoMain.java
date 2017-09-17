@@ -152,6 +152,9 @@ public class HelloSwirldDemoMain implements SwirldMain {
 				int itemNumber = 1;
 				for (String hashgraphMessage : state.getStrings()) {
 					console.out.println("Hashgraph item " + itemNumber + ": " + hashgraphMessage); // print all received transactions
+
+					System.out.println("Hashgraph item " + itemNumber + ": " + hashgraphMessage); // print all received transactions
+
 					itemNumber++;
 				}
 			}

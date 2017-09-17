@@ -19,13 +19,12 @@ public class PostToHashGraph : MonoBehaviour {
 
 	// Called when button is clicked
 	public void MyOnClick() {
-		Debug.Log("Lance - MyOnClick");
-		StartCoroutine( SendPostRequest ("http://localhost:9111") );
-		StartCoroutine( SendPostRequest ("http://b9c99ed0.ngrok.io") );
+		Debug.Log("Lance - MyOnClick - Attempting localhost call...");
+		StartCoroutine( SendPostRequest ("http://localhost:9111", "http://b9c99ed0.ngrok.io") );
 	}
 		
-	public IEnumerator SendPostRequest(string url) {
-		Debug.Log("Lance - PostToHashGraph");
+	public IEnumerator SendPostRequest(string url, string fallbackUrl) {
+		Debug.Log("Lance - PostToHashGraph url = " + url);
 
 		print("Location: " + Input.location.lastData.latitude + " " + 
 			Input.location.lastData.longitude + " " + 
@@ -54,8 +53,18 @@ public class PostToHashGraph : MonoBehaviour {
 		Hashtable headers = new Hashtable();
 		WWW www = new WWW(url, rawData, headers);
 		yield return www;
-
 		Debug.Log("Lance - www result: " + www.text);
+
+		var isSuccess = String.IsNullOrEmpty (www.error);
+		if (!isSuccess) {
+			Debug.Log ("Lance - MyOnClick - call failed");
+			if (fallbackUrl != null) {
+				StartCoroutine (SendPostRequest (fallbackUrl, null));
+			}
+		} else {
+			Debug.Log ("Lance - MyOnClick - call succeeded");
+		}			
+
 	}
 
 }
