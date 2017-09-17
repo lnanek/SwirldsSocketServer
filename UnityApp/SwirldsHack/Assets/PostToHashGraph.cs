@@ -9,6 +9,8 @@ public class PostToHashGraph : MonoBehaviour {
 	// Use this for initialization
 	void Start () {
 		Debug.Log("Lance - Start");
+
+		Input.location.Start();
 	}
 	
 	// Update is called once per frame
@@ -18,11 +20,19 @@ public class PostToHashGraph : MonoBehaviour {
 	// Called when button is clicked
 	public void MyOnClick() {
 		Debug.Log("Lance - MyOnClick");
-		StartCoroutine( SendPostRequest () );
+		StartCoroutine( SendPostRequest ("http://localhost:9111") );
+		StartCoroutine( SendPostRequest ("http://b9c99ed0.ngrok.io") );
 	}
 		
-	public IEnumerator SendPostRequest() {
+	public IEnumerator SendPostRequest(string url) {
 		Debug.Log("Lance - PostToHashGraph");
+
+		print("Location: " + Input.location.lastData.latitude + " " + 
+			Input.location.lastData.longitude + " " + 
+			Input.location.lastData.timestamp);
+
+		var latOrDefault = Input.location.lastData.latitude == 0 ? 37.7780897 : Input.location.lastData.latitude;
+		var lonOrDefault = Input.location.lastData.longitude == 0 ? -122.3846353 : Input.location.lastData.longitude;
 
 		var t = DateTime.UtcNow - new DateTime(1970, 1, 1);
 		var secondsSinceEpoch = (int)t.TotalSeconds;
@@ -30,8 +40,8 @@ public class PostToHashGraph : MonoBehaviour {
 		var postData = @"{";
 		postData += "\"phoneNumber\": \"16464092810\",\n";
 		postData += "\"name\": \"Ina Yosun\",\n";
-		postData += "\"latitude\": \"37.7780897\",\n";
-		postData += "\"longitude\": \"-122.3846353\",\n";
+		postData += "\"latitude\": \"" + latOrDefault + "\",\n";
+		postData += "\"longitude\": \"" + lonOrDefault + "\",\n";
 		postData += "\"type\": \"person\",\n";
 		postData += "\"crisis\": \"fire\",\n";
 		postData += "\"startTime\": " + secondsSinceEpoch + ",\n";
@@ -40,9 +50,6 @@ public class PostToHashGraph : MonoBehaviour {
 		postData += "}";
 
 		var rawData = System.Text.Encoding.UTF8.GetBytes(postData);
-
-		string url = "http://localhost:9111";
-		//string url = "http://b9c99ed0.ngrok.io";
 
 		Hashtable headers = new Hashtable();
 		WWW www = new WWW(url, rawData, headers);
