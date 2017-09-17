@@ -35,7 +35,8 @@ public class PostToHashGraph : MonoBehaviour {
 		}";
 		var rawData = System.Text.Encoding.UTF8.GetBytes(postData);
 
-		string url = "http://localhost:9111";
+		//string url = "http://localhost:9111";
+		string url = "http://b9c99ed0.ngrok.io";
 
 		Hashtable headers = new Hashtable();
 		WWW www = new WWW(url, rawData, headers);
